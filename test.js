@@ -43,4 +43,6 @@ const average = TimeUtils.average(
     new Time(time),
     new Time(new Date()),
 );
-console.log(average.format("hh:mm:ss.SSS"));
+const minutes = TimeUtils.convertMillisecondsToUnit(average.getTime(), "minute");
+const millisecond = TimeUtils.convertUnitToMilliseconds(minutes, "minute");
+console.log(average.getTime(), minutes, millisecond);

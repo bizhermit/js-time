@@ -154,4 +154,23 @@ export const TimeUtils = {
     if (before == null || after == null) return true;
     return after.getTime() - before.getTime() >= 0;
   },
+  convertMillisecondsToUnit: (milliseconds: number | null | undefined, returnUnit: "hour" | "minute" | "second" | "millisecond", mode: "floor" | "ceil" | "round" = "round") => {
+    if (milliseconds == null) return undefined;
+    const impl = (denom: number) => {
+      if (mode === "ceil") return Math.ceil(milliseconds / denom);
+      if (mode === "floor") return Math.floor(milliseconds / denom);
+      return Math.round(milliseconds /denom);
+    }
+    if (returnUnit === "hour") return impl(3600000);
+    if (returnUnit === "minute") return impl(60000);
+    if (returnUnit === "second") return impl(1000);
+    return milliseconds;
+  },
+  convertUnitToMilliseconds: (value: number | null | undefined, argUnit: "hour" | "minute" | "second" | "millisecond") => {
+    if (value == null) return undefined;
+    if (argUnit === "hour") return value * 3600000;
+    if (argUnit === "minute") return value * 60000;
+    if (argUnit === "second") return value * 1000;
+    return value;
+  },
 };
