@@ -10,9 +10,11 @@ class Time {
       return this;
     }
     if (typeof time === "string") {
-      let ctx = time.match(/^(\d{2}|$)(\d{2}|$)(\d{2}|$)(\d{3}|$)/);
-      if (!ctx) ctx = time.match(/^(\d+)?(?::|時|$)(\d+)?(?::|分|$)(\d+)?(?:.|秒|$)(\d+)?(?:.*|$)/);
-      if (ctx) this.time = Number(ctx[1] ?? "0") * 3600000 + Number(ctx[2] ?? "0") * 60000 + Number(ctx[3] ?? "0") * 1000 + Number(ctx[4] ?? "0");
+      let ctx = time.match(/^(\+|\-|)(\d{2}|$)(\d{2}|$)(\d{2}|$)(\d{3}|$)/);
+      if (!ctx) ctx = time.match(/^(\+|\-|)(\d+)?(?::|時|$)(\d+)?(?::|分|$)(\d+)?(?:.|秒|$)(\d+)?(?:.*|$)/);
+      if (ctx) {
+        this.time = (Number(ctx[2] ?? "0") * 3600000 + Number(ctx[3] ?? "0") * 60000 + Number(ctx[4] ?? "0") * 1000 + Number(ctx[5] ?? "0")) * (ctx[1] === "-" ? -1 : 1);
+      }
       return this;
     }
     if (typeof (time as any).time === "number") {
@@ -23,17 +25,19 @@ class Time {
     return this;
   }
 
-  public format(pattern = "hh:mm:ss.SSS") {
+  public format(pattern = "-hh:mm:ss.SSS") {
     return pattern
-      .replace("hh", `0${this.getHours()}`.slice(-2))
-      .replace("h", String(this.getHours()))
-      .replace("mm", `0${this.getMinutes()}`.slice(-2))
-      .replace("m", String(this.getMinutes()))
-      .replace("ss", `0${this.getSeconds()}`.slice(-2))
-      .replace("s", String(this.getSeconds()))
-      .replace("SSS", `00${this.getMilliseconds()}`.slice(-3))
-      .replace("SS", `00${this.getMilliseconds()}`.slice(-3).slice(2))
-      .replace("S", String(this.getMilliseconds()));
+      .replace("+-", this.time < 0 ? "-" : "+")
+      .replace("-", this.time < 0 ? "-" : "")
+      .replace("hh", `0${Math.abs(this.getHours())}`.slice(-2))
+      .replace("h", String(Math.abs(this.getHours())))
+      .replace("mm", `0${Math.abs(this.getMinutes())}`.slice(-2))
+      .replace("m", String(Math.abs(this.getMinutes())))
+      .replace("ss", `0${Math.abs(this.getSeconds())}`.slice(-2))
+      .replace("s", String(Math.abs(this.getSeconds())))
+      .replace("SSS", `00${Math.abs(this.getMilliseconds())}`.slice(-3))
+      .replace("SS", `00${Math.abs(this.getMilliseconds())}`.slice(-3).slice(2))
+      .replace("S", String(Math.abs(this.getMilliseconds())));
   }
 
   public getTime() {
@@ -41,6 +45,7 @@ class Time {
   }
 
   public getHours() {
+    if (this.time < 0) return Math.ceil(this.time / 3600000);
     return Math.floor(this.time / 3600000);
   }
 
@@ -50,7 +55,11 @@ class Time {
   }
 
   public getMinutes(include?: boolean) {
-    if (include) return Math.floor(this.time / 60000);
+    if (include) {
+      if (this.time < 0) return Math.ceil(this.time / 60000);
+      return Math.floor(this.time / 60000);
+    }
+    if (this.time < 0) return Math.ceil(this.time / 60000) % 60; 
     return Math.floor(this.time / 60000) % 60;
   }
 
@@ -60,7 +69,11 @@ class Time {
   }
 
   public getSeconds(include?: boolean) {
-    if (include) return Math.floor(this.time / 1000);
+    if (include) {
+      if (this.time < 0) return Math.ceil(this.time / 1000);
+      return Math.floor(this.time / 1000);
+    }
+    if (this.time < 0) return Math.ceil(this.time / 1000) % 60;
     return Math.floor(this.time / 1000) % 60;
   }
 
@@ -108,15 +121,27 @@ class Time {
     return this;
   }
 
+  public isPlus() {
+    return this.time >= 0;
+  }
+
+  public isMinus() {
+    return this.time < 0;
+  }
+
 };
 
 export default Time;
 
 export const TimeUtils = {
   max: (...times: Array<Time | null | undefined>) => {
-    let max = 0;
+    let max: number | undefined;
     times.forEach(time => {
       if (time == null) return;
+      if (max == null) {
+        max = time.getTime();
+        return;
+      }
       max = Math.max(max, time.getTime());
     });
     return new Time(max);
@@ -150,6 +175,11 @@ export const TimeUtils = {
     });
     return new Time(t);
   },
+  minus: (time1: Time | null | undefined, time2: Time | null | undefined) => {
+    if (time1 == null) return new Time((time2?.getTime() ?? 0) * -1);
+    if (time2 == null) return new Time(time1.getTime());
+    return new Time(time1.getTime() - time2.getTime());
+  },
   validContext: (before: Time | null | undefined, after: Time | null | undefined) => {
     if (before == null || after == null) return true;
     return after.getTime() - before.getTime() >= 0;
@@ -157,8 +187,14 @@ export const TimeUtils = {
   convertMillisecondsToUnit: (milliseconds: number | null | undefined, returnUnit: "hour" | "minute" | "second" | "millisecond", mode: "floor" | "ceil" | "round" = "round") => {
     if (milliseconds == null) return undefined;
     const impl = (denom: number) => {
-      if (mode === "ceil") return Math.ceil(milliseconds / denom);
-      if (mode === "floor") return Math.floor(milliseconds / denom);
+      if (mode === "ceil") {
+        if (milliseconds < 0) Math.floor(milliseconds / denom);
+        return Math.ceil(milliseconds / denom);
+      }
+      if (mode === "floor") {
+        if (milliseconds < 0) Math.ceil(milliseconds / denom);
+        return Math.floor(milliseconds / denom);
+      }
       return Math.round(milliseconds /denom);
     }
     if (returnUnit === "hour") return impl(3600000);
@@ -172,5 +208,8 @@ export const TimeUtils = {
     if (argUnit === "minute") return value * 60000;
     if (argUnit === "second") return value * 1000;
     return value;
+  },
+  format: (millisecond: number, pattern?: string) => {
+    return new Time(millisecond).format(pattern);
   },
 };

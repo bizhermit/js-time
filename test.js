@@ -14,11 +14,12 @@ const Time = require("./dist/index").default;
 //     const time = new Time(num);
 //     console.log(time.format());
 // }
-// {
-//     console.log("- string");
-//     const time = new Time("12:34:56.789");
-//     console.log(time.format());
-// }
+{
+    console.log("- string");
+    console.log(new Time("12:34:56.789").format());
+    console.log(new Time("+12:34:56.789").format());
+    console.log(new Time("-12:34:56.789").format());
+}
 // {
 //     console.log("- date");
 //     const time = new Time(new Date("2022-02-24 23:49:51.234"));
@@ -45,4 +46,8 @@ const average = TimeUtils.average(
 );
 const minutes = TimeUtils.convertMillisecondsToUnit(average.getTime(), "minute");
 const millisecond = TimeUtils.convertUnitToMilliseconds(minutes, "minute");
-console.log(average.getTime(), minutes, millisecond);
+console.log(average.format(), average.getTime(), minutes, millisecond);
+
+// console.log(new Time(3602000).format());
+// console.log(new Time(-3602000).format());
+// console.log(TimeUtils.minus(undefined, new Time(3602000)).isPlus());
