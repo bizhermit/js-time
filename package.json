@@ -4,7 +4,7 @@
   "description": "time object",
   "repository": {
     "type": "git",
-    "ulr": "https://github.com/bizhermit/js-time.git"
+    "url": "https://github.com/bizhermit/js-time.git"
   },
   "bugs": {
     "url": "https://github.com/bizhermit/js-time/issues",
