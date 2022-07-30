@@ -131,10 +131,9 @@ class Time {
 
 };
 
-export default Time;
+export namespace TimeUtils {
 
-export const TimeUtils = {
-  max: (...times: Array<Time | null | undefined>) => {
+  export const max = (...times: Array<Time | null | undefined>) => {
     let max: number | undefined;
     times.forEach(time => {
       if (time == null) return;
@@ -145,8 +144,9 @@ export const TimeUtils = {
       max = Math.max(max, time.getTime());
     });
     return new Time(max);
-  },
-  min: (...times: Array<Time | null | undefined>) => {
+  };
+
+  export const min = (...times: Array<Time | null | undefined>) => {
     let min: number | undefined = undefined;
     times.forEach(time => {
       if (time == null) return;
@@ -157,34 +157,40 @@ export const TimeUtils = {
       min = Math.min(min, time.getTime());
     });
     return new Time(min);
-  },
-  average: (...times: Array<Time | null | undefined>) => {
+  };
+
+  export const average = (...times: Array<Time | null | undefined>) => {
     const time = TimeUtils.adds(...times);
     return new Time(Math.round(time.getTime() / Math.max(1, times.length)));
-  },
-  add: (time1: Time | null | undefined, time2: Time | null | undefined) => {
+  };
+
+  export const add = (time1: Time | null | undefined, time2: Time | null | undefined) => {
     if (time1 == null) return new Time(time2);
     if (time2 == null) return new Time(time1);
     return new Time(time1.getTime() + time2.getTime());
-  },
-  adds: (...times: Array<Time | null |undefined>) => {
+  };
+
+  export const adds = (...times: Array<Time | null |undefined>) => {
     let t = 0;
     times.forEach(time => {
         if (time == null) return;
         t += time.getTime();
     });
     return new Time(t);
-  },
-  minus: (time1: Time | null | undefined, time2: Time | null | undefined) => {
+  };
+
+  export const minus = (time1: Time | null | undefined, time2: Time | null | undefined) => {
     if (time1 == null) return new Time((time2?.getTime() ?? 0) * -1);
     if (time2 == null) return new Time(time1.getTime());
     return new Time(time1.getTime() - time2.getTime());
-  },
-  validContext: (before: Time | null | undefined, after: Time | null | undefined) => {
+  };
+
+  export const validContext = (before: Time | null | undefined, after: Time | null | undefined) => {
     if (before == null || after == null) return true;
     return after.getTime() - before.getTime() >= 0;
-  },
-  convertMillisecondsToUnit: (milliseconds: number | null | undefined, returnUnit: "hour" | "minute" | "second" | "millisecond", mode: "floor" | "ceil" | "round" = "round") => {
+  };
+
+  export const convertMillisecondsToUnit = (milliseconds: number | null | undefined, returnUnit: "hour" | "minute" | "second" | "millisecond", mode: "floor" | "ceil" | "round" = "round") => {
     if (milliseconds == null) return undefined;
     const impl = (denom: number) => {
       if (mode === "ceil") {
@@ -201,15 +207,20 @@ export const TimeUtils = {
     if (returnUnit === "minute") return impl(60000);
     if (returnUnit === "second") return impl(1000);
     return milliseconds;
-  },
-  convertUnitToMilliseconds: (value: number | null | undefined, argUnit: "hour" | "minute" | "second" | "millisecond") => {
+  };
+
+  export const convertUnitToMilliseconds = (value: number | null | undefined, argUnit: "hour" | "minute" | "second" | "millisecond") => {
     if (value == null) return undefined;
     if (argUnit === "hour") return value * 3600000;
     if (argUnit === "minute") return value * 60000;
     if (argUnit === "second") return value * 1000;
     return value;
-  },
-  format: (millisecond: number, pattern?: string) => {
+  };
+
+  export const format = (millisecond: number, pattern?: string) => {
     return new Time(millisecond).format(pattern);
-  },
+  };
+
 };
+
+export default Time;
