@@ -2,6 +2,10 @@
   "name": "@bizhermit/time",
   "version": "2.0.0-rc.0",
   "description": "time object",
+  "keywords": [
+    "bizhermit",
+    "time"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/bizhermit/js-time.git"
@@ -12,16 +16,12 @@
   "author": "Senda Ryoichi <rsenda@bizhermit.com> (https://bizhermit.com)",
   "homepage": "https://bizhermit.com",
   "license": "MIT",
-  
-  "scripts": {
-    "license": "npx rimraf CREDIT && npx license -o CREDIT --returnError",
-    "build": "npm run license && npx rimraf package && npx tsc -p src/tsconfig.json && npx minifier package && npx npm-package-utils pack"
-  },
+  "main": "dist/index",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
-    "@bizhermit/license": "^1.0.10",
-    "@bizhermit/minifier": "^1.0.5",
-    "@bizhermit/npm-package-utils": "^0.0.0-rc.6",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.5.5"
+    "typescript": "^4.7.4"
   }
 }
